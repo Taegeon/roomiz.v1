@@ -8,33 +8,6 @@
 import SwiftUI
 
 //MainActor is for swift concurrency (I need to check the concept) 
-@MainActor
-final class SignInEmailViewModel : ObservableObject {
-    @Published var email = ""
-    @Published var password = ""
-    
-    func signUp() async throws{
-        //validation purpose
-        guard !email.isEmpty, !password.isEmpty else {
-            print("No email or password found")
-            return
-        }
-        let returnedUserData = try await AuthenticationManager.shared.createUser(email: email, password: password)
-        print("success")
-        print(returnedUserData)
-    }
-    
-    func signIn() async throws{
-        //validation purpose
-        guard !email.isEmpty, !password.isEmpty else {
-            print("No email or password found")
-            return
-        }
-        try await AuthenticationManager.shared.signInUser(email: email, password: password)
-       
-    }
-
-}
 
 
 struct SignInEmailView: View {

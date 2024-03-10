@@ -224,7 +224,8 @@ struct FirstView: View {
 
 struct ShopView: View {
     var body: some View {
-        Text("This is the Shop View")
+            Text("shop")
+        
     }
     
 }
@@ -273,7 +274,8 @@ struct SecondView: View { //settingsview
     var body: some View {
         ZStack {
             NavigationStack {
-                SettingsView(showSignInView: $showSignInView)
+                ProfileView(showSignInView: $showSignInView)
+                //SettingsView(showSignInView: $showSignInView)
             }
         }
         .onAppear {
