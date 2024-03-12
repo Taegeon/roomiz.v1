@@ -275,7 +275,7 @@ struct SecondView: View { //settingsview
         ZStack {
             NavigationStack {
                 ProfileView(showSignInView: $showSignInView)
-                //SettingsView(showSignInView: $showSignInView)
+                SettingsView(showSignInView: $showSignInView)
             }
         }
         .onAppear {

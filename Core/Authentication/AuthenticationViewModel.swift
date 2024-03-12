@@ -12,6 +12,8 @@ import FirebaseAuth
 
 @MainActor
 final class AuthenticationViewModel: ObservableObject {
+  
+    
     func signInGoogle() async throws
     {
         guard let topVC = Utilities.shared.topViewController() else {
@@ -27,7 +29,8 @@ final class AuthenticationViewModel: ObservableObject {
         
         //try await AuthenticationManager.shared.signInWithGoogle(tokens: tokens)
         let authDataResult = try await AuthenticationManager.shared.signInWithGoogle(tokens: tokens)
-        try await UserManager.shared.createNewUser(auth: authDataResult)
+        let user = DBUser(auth: authDataResult)
+        try await UserManager.shared.createNewUser(user: user)
     
     }
 }

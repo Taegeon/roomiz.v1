@@ -13,13 +13,18 @@ final class SignInEmailViewModel : ObservableObject {
     @Published var password = ""
     
     func signUp() async throws{
-        //validation purpose
         guard !email.isEmpty, !password.isEmpty else {
             print("No email or password found")
             return
         }
-        let returnedUserData = try await AuthenticationManager.shared.createUser(email: email, password: password)
-        try await UserManager.shared.createNewUser(auth: returnedUserData)
+        let authDataResult = try await AuthenticationManager.shared.createUser(email: email, password: password)
+        let user = DBUser(auth: authDataResult)
+        try await UserManager.shared.createNewUser(user: user)
+        
+        //validation purpose
+
+//        let returnedUserData = try await AuthenticationManager.shared.createUser(email: email, password: password)
+//        try await UserManager.shared.createNewUser(auth: returnedUserData)
      
     }
     
