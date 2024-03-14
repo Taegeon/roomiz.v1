@@ -36,7 +36,12 @@ struct SearchBar: UIViewRepresentable {
     }
 
     func makeUIView(context: Context) -> UISearchBar {
-        let searchBar = UISearchBar(frame: .zero)
+        let searchBar = UISearchBar(frame: .zero )
+        searchBar.searchBarStyle = .minimal
+        searchBar.placeholder = "Search"
+        
+        
+        
         searchBar.delegate = context.coordinator
         return searchBar
     }
@@ -52,6 +57,7 @@ struct ContentView: View {
     @State private var favorites : Set<String> = []
     @State private var likesCount: [String:Int] = [:]
     @State private var likedImages : Set<String> = []
+    @State private var showSearchBar = false
     
     let imageDataArray: [ImageData] = [
             ImageData(imageName: "room1", category: "Category A", title: "TITLE 1", description: "cozy room NYC"),
@@ -77,8 +83,11 @@ struct ContentView: View {
         TabView {
             NavigationView {
                 VStack {
-                    SearchBar(searchText: $searchText)
-                                       .padding()
+                    if showSearchBar {
+                                SearchBar(searchText: $searchText)
+                                    .padding()
+                            }
+
                     ScrollView {
                        LazyVGrid(columns: Array(repeating: GridItem(), count: 1), spacing: 100) {
                            ForEach(filteredImageData){
@@ -124,13 +133,21 @@ struct ContentView: View {
                        .padding()
                    }
                 }
+                .navigationTitle("Roomiz")
                 .padding()
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        Button(action: {
+                                showSearchBar.toggle()
+                        }) {
+                            Image(systemName: "magnifyingglass")
+                        }
+                    }
                     
                     ToolbarItem(placement: .navigationBarTrailing) {
                         Button(action: {
-                            // Add action for trailing toolbar item
+                            // This is for the notification
                         }) {
                             Image(systemName: "bell")
                         }
@@ -138,10 +155,6 @@ struct ContentView: View {
                 }
                 .navigationBarTitleDisplayMode(.inline)
             }
-            
-            
-            
-            
             
             
             
