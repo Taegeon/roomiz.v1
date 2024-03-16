@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Firebase
 
 struct ImageData: Identifiable {
     let id = UUID()
@@ -13,6 +14,19 @@ struct ImageData: Identifiable {
     let category: String
     let title: String
     let description: String
+}
+
+// in order to save it into firebase db. Making separate collections
+struct ImageDataModel: Codable {
+    let imageName : String
+    let category : String
+    let title : String
+    let description : String
+}
+//firebase likes
+struct LikesModel : Codable {
+    let title : String
+    let count : Int
 }
 
 
@@ -59,6 +73,16 @@ struct ContentView: View {
     @State private var likedImages : Set<String> = []
     @State private var showSearchBar = false
     
+    private func loadInitialLikesCount() {
+        FirestoreManager.shared.getLikesData { likesData in
+            for like in likesData {
+                likesCount[like.title] = like.count
+            }
+        }
+    }
+    
+    
+
     let imageDataArray: [ImageData] = [
             ImageData(imageName: "room1", category: "Category A", title: "TITLE 1", description: "cozy room NYC"),
             ImageData(imageName: "room2", category: "Category B", title: "TITLE 2", description: "check my desk"),
@@ -80,76 +104,69 @@ struct ContentView: View {
     }
     
     var body: some View {
-       
         TabView {
             NavigationView {
                 VStack {
                     if showSearchBar {
-                                SearchBar(searchText: $searchText)
-                                    .padding()
-                            }
-                    
+                        SearchBar(searchText: $searchText)
+                            .padding()
+                    }
                     ZStack(alignment: .bottomTrailing) {
                         ScrollView {
-                           LazyVGrid(columns: Array(repeating: GridItem(), count: 1), spacing: 100) {
-                               ForEach(filteredImageData){
-                                   imageData in
-                                   NavigationLink(destination: DetailView(imageData: imageData)) {
-                                       VStack {
-                                           Image(imageData.imageName)
-                                               .resizable()
-                                               .aspectRatio(contentMode: .fill)
-                                               .frame(width: 300, height: 200)
-                                               .cornerRadius(20)
-                                               .clipped()
-                                           Text(imageData.title)
-                                               .font(.headline)
-                                           Text(imageData.description)
-                                               .font(.subheadline)
-                                           HStack{
-                                               Button(action: {
-                                                   toggleLike(imageData.title) // Toggle like
-                                               }) {
-                                                   HStack {
-                                                       Image(systemName:
+                            LazyVGrid(columns: Array(repeating: GridItem(), count: 1), spacing: 100) {
+                                ForEach(filteredImageData){
+                                    imageData in
+                                    NavigationLink(destination: DetailView(imageData: imageData)) {
+                                        VStack {
+                                            Image(imageData.imageName)
+                                                .resizable()
+                                                .aspectRatio(contentMode: .fill)
+                                                .frame(width: 300, height: 200)
+                                                .cornerRadius(20)
+                                                .clipped()
+                                            Text(imageData.title)
+                                                .font(.headline)
+                                            Text(imageData.description)
+                                                .font(.subheadline)
+                                            HStack{
+                                                Button(action: {
+                                                    toggleLike(imageData.title) // Toggle like
+                                                }) {
+                                                    HStack {
+                                                        Image(systemName:
                                                                 likedImages.contains(imageData.title) ? "hand.thumbsup.fill" : "hand.thumbsup")
-                                                       .foregroundColor(Color.red)
-                                                       Text("\(likesCount[imageData.title] ?? 0)") // Show likes count
-                                                   }
-                                               }
-                                               Button(action: {
-                                                   toggleFavorite(imageData.title)
-                                               }) {
-                                                   Image(systemName: favorites.contains(imageData.title) ? "heart.fill" : "heart")
-                                                       .foregroundColor(Color.red)
-                                               }
-                                           }
-                                       }
-                                   }
-                               }
-                           }
-                           .padding()
-                       } // end of scrollview
-                        Button(action: {
-                            
-                        }) {
+                                                        .foregroundColor(Color.red)
+                                                        Text("\(likesCount[imageData.title] ?? 0)") // Show likes count
+                                                    }
+                                                }
+                                                Button(action: {
+                                                    toggleFavorite(imageData.title)
+                                                }) {
+                                                    Image(systemName: favorites.contains(imageData.title) ? "heart.fill" : "heart")
+                                                        .foregroundColor(Color.red)
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            .padding()
+                        } // end of scrollview
+                        NavigationLink(destination: AddCategoryView()) {
                             Image(systemName: "plus.app.fill")
                                 .foregroundColor(.blue)
                                 .font(.system(size: 40))
                                 .frame(width: 70, height: 100)
                         }
-                        
                     } // end of ZStack
-     
-                    
-                }
+                }// end of VStack
                 .navigationTitle("Roomiz")
                 .padding()
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem(placement: .navigationBarLeading) {
                         Button(action: {
-                                showSearchBar.toggle()
+                            showSearchBar.toggle()
                         }) {
                             Image(systemName: "magnifyingglass")
                         }
@@ -164,6 +181,8 @@ struct ContentView: View {
                     }
                 }
                 .navigationBarTitleDisplayMode(.inline)
+            }.onAppear {
+                loadInitialLikesCount()
             }
             
             
@@ -199,17 +218,25 @@ struct ContentView: View {
                     Text("Profile")
                 }
             }
+            
+            
+            
+            
         }
     }
-    func toggleLike(_ category: String) {
-        if likedImages.contains(category){
-            likedImages.remove(category)
+
+
+    
+    func toggleLike(_ title: String) {
+        if likedImages.contains(title){
+            likedImages.remove(title)
         }else {
-            likedImages.insert(category)
+            likedImages.insert(title)
         }
         
-        likesCount[category, default: 0] += likedImages.contains(category) ? 1 : -1
-        //likesCount[category, default: 0] += 1 - 2 * (favorites.contains(category) ? 1 : 0)
+        likesCount[title, default: 0] += likedImages.contains(title) ? 1 : -1
+        let likesData = LikesModel(title: title, count: likesCount[title] ?? 0)
+        FirestoreManager.shared.saveLikesData(likesData: likesData)
     }
 
     // parameter category should be title
@@ -223,7 +250,11 @@ struct ContentView: View {
 }
 
 
-
+struct AddCategoryView: View {
+    var body: some View {
+        Text("Add Category View")
+    }
+}
 
 
 struct DetailView: View {
