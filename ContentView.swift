@@ -80,6 +80,7 @@ struct ContentView: View {
     }
     
     var body: some View {
+       
         TabView {
             NavigationView {
                 VStack {
@@ -87,51 +88,60 @@ struct ContentView: View {
                                 SearchBar(searchText: $searchText)
                                     .padding()
                             }
-
-                    ScrollView {
-                       LazyVGrid(columns: Array(repeating: GridItem(), count: 1), spacing: 100) {
-                           ForEach(filteredImageData){
-                               imageData in
-                               NavigationLink(destination: DetailView(imageData: imageData)) {
-                                   VStack {
-                                       Image(imageData.imageName)
-                                           .resizable()
-                                           .aspectRatio(contentMode: .fill)
-                                           .frame(width: 300, height: 200)
-                                           .cornerRadius(20)
-                                           .clipped()
-                                       Text(imageData.title)
-                                           .font(.headline)
-                                       Text(imageData.description)
-                                           .font(.subheadline)
-                                       HStack{
-                                           Button(action: {
-                                               toggleLike(imageData.title) // Toggle like
-                                           }) {
-                                               HStack {
-                                                   Image(systemName:
-                                                            likedImages.contains(imageData.title) ? "hand.thumbsup.fill" : "hand.thumbsup")
-                                                   .foregroundColor(Color.red)
-                                                   
-      
-                                                   Text("\(likesCount[imageData.title] ?? 0)") // Show likes count
+                    
+                    ZStack(alignment: .bottomTrailing) {
+                        ScrollView {
+                           LazyVGrid(columns: Array(repeating: GridItem(), count: 1), spacing: 100) {
+                               ForEach(filteredImageData){
+                                   imageData in
+                                   NavigationLink(destination: DetailView(imageData: imageData)) {
+                                       VStack {
+                                           Image(imageData.imageName)
+                                               .resizable()
+                                               .aspectRatio(contentMode: .fill)
+                                               .frame(width: 300, height: 200)
+                                               .cornerRadius(20)
+                                               .clipped()
+                                           Text(imageData.title)
+                                               .font(.headline)
+                                           Text(imageData.description)
+                                               .font(.subheadline)
+                                           HStack{
+                                               Button(action: {
+                                                   toggleLike(imageData.title) // Toggle like
+                                               }) {
+                                                   HStack {
+                                                       Image(systemName:
+                                                                likedImages.contains(imageData.title) ? "hand.thumbsup.fill" : "hand.thumbsup")
+                                                       .foregroundColor(Color.red)
+                                                       Text("\(likesCount[imageData.title] ?? 0)") // Show likes count
+                                                   }
+                                               }
+                                               Button(action: {
+                                                   toggleFavorite(imageData.title)
+                                               }) {
+                                                   Image(systemName: favorites.contains(imageData.title) ? "heart.fill" : "heart")
+                                                       .foregroundColor(Color.red)
                                                }
                                            }
-                                           
-                                           Button(action: {
-                                               toggleFavorite(imageData.title)
-                                           }) {
-                                               Image(systemName: favorites.contains(imageData.title) ? "heart.fill" : "heart")
-                                                   .foregroundColor(Color.red)
-                                           }
                                        }
-                                       
                                    }
                                }
                            }
-                       }
-                       .padding()
-                   }
+                           .padding()
+                       } // end of scrollview
+                        Button(action: {
+                            
+                        }) {
+                            Image(systemName: "plus.app.fill")
+                                .foregroundColor(.blue)
+                                .font(.system(size: 40))
+                                .frame(width: 70, height: 100)
+                        }
+                        
+                    } // end of ZStack
+     
+                    
                 }
                 .navigationTitle("Roomiz")
                 .padding()
