@@ -184,13 +184,7 @@ struct ContentView: View {
             }.onAppear {
                 loadInitialLikesCount()
             }
-            
-            
-            
-            
-            
-            
-            
+
             .tabItem {
                 VStack {
                     Image(systemName: "house.fill")
@@ -198,7 +192,7 @@ struct ContentView: View {
                 }
             }
             
-            ShopView().tabItem {
+            ShopView(imageDataArray: imageDataArray).tabItem {
                 VStack {
                     Image(systemName: "cart.fill")
                     Text("Shop")
@@ -288,12 +282,53 @@ struct FirstView: View {
 }
 
 struct ShopView: View {
+    @State private var currentIndex = 0
+    let timer = Timer.publish(every: 2, on: .main, in: .common).autoconnect()
+    let imageDataArray: [ImageData]
+
     var body: some View {
-            Text("shop")
-        
+        NavigationView {
+            VStack{
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 0) {
+                        ForEach(imageDataArray.indices, id: \.self) { index in
+                            ShopImageView(imageData: imageDataArray[index])
+                                .frame(width: UIScreen.main.bounds.width, height: 200) // Adjust the height as needed
+                        }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .offset(x: CGFloat(currentIndex) * -UIScreen.main.bounds.width)
+                    .animation(.easeInOut)
+                    .onReceive(timer) { _ in
+                        withAnimation {
+                            currentIndex = (currentIndex + 1) % imageDataArray.count
+                        }
+                    }
+                }
+                .frame(height: 100) // Adjust the height as needed
+                .padding(.top, -250)
+                .navigationTitle("Shop🛒")
+
+            }
+        }
     }
-    
 }
+
+struct ShopImageView: View {
+    let imageData: ImageData
+    
+    var body: some View {
+        VStack {
+            Image(imageData.imageName)
+                .resizable()
+                .aspectRatio(contentMode: .fill)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .clipped()
+            // Add any additional content you want to display for each image
+        }
+    }
+}
+
 struct FavoriteView: View {
     let favorites: Set<String> // Pass the set of favorites
     let imageDataArray: [ImageData]
@@ -304,7 +339,6 @@ struct FavoriteView: View {
     }
 
     var body: some View {
-        
         NavigationView {
             ScrollView {
                 LazyVGrid(columns: Array(repeating: GridItem(), count: 1), spacing: 100) {
@@ -325,11 +359,9 @@ struct FavoriteView: View {
                     }
                 }
                 .padding()
-            }
+            }.navigationTitle("My Favorites ❤️")
         }
-        
-
-        
+    
     }
 }
 
